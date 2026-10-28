@@ -4,6 +4,9 @@ import numpy as np
 from datetime import datetime, time, timedelta
 import requests
 from nsepython import nse_optionchain_scrapper, nse_eq
+except ImportError:
+    nse_optionchain_scrapper = None
+    nse_eq = None
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import warnings
@@ -115,6 +118,8 @@ def send_telegram(token, chat_id, message):
 @st.cache_data(ttl=40)
 def get_nifty_spot():
     try:
+        if nse_eq is None:
+            return None
         data = nse_eq("NIFTY")
         return float(data["lastPrice"])
     except:
@@ -122,6 +127,12 @@ def get_nifty_spot():
 
 @st.cache_data(ttl=60)
 def get_option_chain():
+    try:
+        if nse_optionchain_scrapper is None:
+            return None
+        return nse_optionchain_scrapper("NIFTY")
+    except:
+        return None
     try:
         return nse_optionchain_scrapper("NIFTY")
     except:
